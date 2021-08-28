@@ -41,8 +41,8 @@ func main() {
 		fail(err.Error())
 	}
 	var prReviewComments []commenter.PRReviewComment
-	for _, result := range results {
-		prReviewComment := generatePRReviewComment(result)
+  for _, result := range results {
+    prReviewComment := generatePRReviewComment(result)
     prReviewComments = append(prReviewComments, prReviewComment)
 	}
 	draftPRReviewComments := c.CreateDraftPRReviewComments(prReviewComments)
@@ -55,9 +55,9 @@ func main() {
 
 func selectPRReviewEventBy(comments []*github.DraftReviewComment) string {
   if len(comments) > 0 {
-    return commenter.Approve
+		return commenter.RequestChanges
 	} else {
-	  return commenter.RequestChanges
+    return commenter.Approve
 	}
 }
 
