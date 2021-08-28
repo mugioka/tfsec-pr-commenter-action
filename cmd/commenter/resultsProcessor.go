@@ -13,9 +13,10 @@ type checkRange struct {
 
 type result struct {
 	RuleID          string      `json:"rule_id"`
+	LegacyRuleID    string      `json:"legacy_rule_id"`
 	RuleDescription string      `json:"rule_description"`
 	RuleProvider    string      `json:"rule_provider"`
-	Link            string      `json:"link"`
+	Links           []string    `json:"links"`
 	Range           *checkRange `json:"location"`
 	Description     string      `json:"description"`
 	RangeAnnotation string      `json:"-"`

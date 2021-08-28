@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mugioka/go-github-pr-commenter/commenter"
+	"github.com/google/go-github/v32/github"
 )
 
 func main() {
@@ -31,7 +32,6 @@ func main() {
 	if err != nil {
 		fail(err.Error())
 	}
-
 	c, err := commenter.NewCommenter(token, owner, repo, prNo)
 	if err != nil {
 		fail(err.Error())
@@ -40,44 +40,46 @@ func main() {
 	if err != nil {
 		fail(err.Error())
 	}
-
-	var errMessages []string
-	workspacePath := fmt.Sprintf("%s/", os.Getenv("GITHUB_WORKSPACE"))
+	var prReviewComments []commenter.PRReviewComment
 	for _, result := range results {
-		result.Range.Filename = strings.ReplaceAll(result.Range.Filename, workspacePath, "")
-		comment := generateErrorMessage(result)
-		err := c.WriteMultiLineComment(result.Range.Filename, comment, result.Range.StartLine, result.Range.EndLine)
-		if err != nil {
-			// don't error if its simply that the comments aren't valid for the PR
-			switch err.(type) {
-			case commenter.CommentAlreadyWrittenError:
-				fmt.Println("Comment already written so not writing")
-			case commenter.CommentNotValidError:
-				fmt.Printf("Comment not written [%s], not part of the current PR\n", result.Description)
-				continue
-			default:
-				errMessages = append(errMessages, err.Error())
-			}
-		} else {
-			fmt.Printf("Writing comment to %s:%d:%d", result.Range.Filename, result.Range.StartLine, result.Range.EndLine)
-		}
+		prReviewComment := generatePRReviewComment(result)
+    prReviewComments = append(prReviewComments, prReviewComment)
 	}
+	draftPRReviewComments := c.CreateDraftPRReviewComments(prReviewComments)
+	prReviewEvent := selectPRReviewEventBy(draftPRReviewComments)
+	err = c.WritePRReview(draftPRReviewComments, prReviewEvent)
+	if err != nil {
+		fail(err.Error())
+	}
+}
 
-	if len(errMessages) > 0 {
-		fmt.Printf("There were %d errors:\n", len(errMessages))
-		for _, err := range errMessages {
-			fmt.Println(err)
-		}
+func selectPRReviewEventBy(comments []*github.DraftReviewComment) string {
+  if len(comments) > 0 {
+    return commenter.Approve
+	} else {
+	  return commenter.RequestChanges
+	}
+}
+
+func generatePRReviewComment(result result) commenter.PRReviewComment {
+	fileName := strings.ReplaceAll(result.Range.Filename, fmt.Sprintf("%s/", os.Getenv("GITHUB_WORKSPACE")), "")
+	body := generateErrorMessage(result)
+	return commenter.PRReviewComment{
+		FileName: fileName,
+		StartLine: result.Range.StartLine,
+		EndLine: result.Range.EndLine,
+		Body: body,
 	}
 }
 
 func generateErrorMessage(result result) string {
-	return fmt.Sprintf(`tfsec check %s failed. 
-
-%s
-
-For more information, see https://tfsec.dev/docs/%s/%s/`,
-		result.RuleID, result.Description, strings.ToLower(result.RuleProvider), result.RuleID)
+	return fmt.Sprintf(
+		"## result\ntfsec check %s failed.\n## severity\n⚠️%s\n## reason\n%s\n## how to ignore\n`#tfsec:ignore:%s`([refs](https://github.com/aquasecurity/tfsec#ignoring-warnings))\n\nFor more information, [see](%s)\n",
+		result.RuleID,
+		result.Severity,
+		result.Description,
+		result.LegacyRuleID,
+		result.Links[0])
 }
 
 func extractPullRequestNumber() (int, error) {
