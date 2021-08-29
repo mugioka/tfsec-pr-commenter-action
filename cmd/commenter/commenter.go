@@ -42,10 +42,12 @@ func main() {
   }
   var prReviewComments []commenter.PRReviewComment
   for _, result := range results {
-    prReviewComments = append(prReviewComments, generatePRReviewComment(result))
+    prReviewComment := generatePRReviewComment(result)
+    prReviewComments = append(prReviewComments, prReviewComment)
   }
   draftPRReviewComments := c.CreateDraftPRReviewComments(prReviewComments)
-  err = c.WritePRReview(draftPRReviewComments, selectPRReviewEventBy(draftPRReviewComments))
+  prReviewEvent := selectPRReviewEventBy(draftPRReviewComments)
+  err = c.WritePRReview(draftPRReviewComments, prReviewEvent)
   if err != nil {
     fail(err.Error())
   } else {
