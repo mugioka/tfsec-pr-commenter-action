@@ -17,7 +17,7 @@ type Result struct {
   RuleDescription string      `json:"rule_description"`
   RuleProvider    string      `json:"rule_provider"`
   Links           []string    `json:"links"`
-  Range           *checkRange `json:"location"`
+  Range           *CheckRange `json:"location"`
   Description     string      `json:"description"`
   RangeAnnotation string      `json:"-"`
   Severity        string      `json:"severity"`
