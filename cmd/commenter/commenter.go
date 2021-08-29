@@ -44,7 +44,8 @@ func main() {
   for _, result := range results {
     prReviewComments = append(prReviewComments, generatePRReviewComment(result))
   }
-  err = c.WritePRReview(c.CreateDraftPRReviewComments(prReviewComments), selectPRReviewEventBy(draftPRReviewComments))
+  draftPRReviewComments := c.CreateDraftPRReviewComments(prReviewComments)
+  err = c.WritePRReview(draftPRReviewComments, selectPRReviewEventBy(draftPRReviewComments))
   if err != nil {
     fail(err.Error())
   } else {
