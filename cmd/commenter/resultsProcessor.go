@@ -26,7 +26,7 @@ type Result struct {
 const resultsFile = "results.json"
 
 func loadResultsFile() ([]Result, error) {
-  results := []Result{}
+  results := struct{ Results []Result }{}
 
   file, err := ioutil.ReadFile(resultsFile)
   if err != nil {
@@ -36,5 +36,5 @@ func loadResultsFile() ([]Result, error) {
   if err != nil {
     return nil, err
   }
-  return results, nil
+  return results.Results, nil
 }
