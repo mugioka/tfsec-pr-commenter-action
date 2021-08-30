@@ -7,7 +7,7 @@ github.com/google/go-github/v38/github
 # github.com/google/go-querystring v1.1.0
 ## explicit
 github.com/google/go-querystring/query
-# github.com/mugioka/go-github-pr-commenter v0.0.22
+# github.com/mugioka/go-github-pr-commenter v0.0.23
 ## explicit
 github.com/mugioka/go-github-pr-commenter/commenter
 # golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
