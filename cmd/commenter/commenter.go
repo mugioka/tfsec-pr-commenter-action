@@ -45,9 +45,12 @@ func main() {
 		prReviewComment := generatePRReviewComment(result)
 		prReviewComments = append(prReviewComments, prReviewComment)
 	}
+	for _, testComment1 := range prReviewComments {
+		fmt.Println(testComment1.Body)
+	}
 	draftPRReviewComments := c.CreateDraftPRReviewComments(prReviewComments)
-	for _, testComment := range draftPRReviewComments {
-		fmt.Println(testComment)
+	for _, testComment2 := range draftPRReviewComments {
+		fmt.Println(testComment2.Body)
 	}
 	prReviewEvent := selectPRReviewEventBy(draftPRReviewComments)
 	err = c.WritePRReview(draftPRReviewComments, prReviewEvent)
